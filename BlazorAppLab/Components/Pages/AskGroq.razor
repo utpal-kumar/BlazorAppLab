@@ -1,0 +1,55 @@
+﻿@page "/askgroq" 
+@using System.Net.Http.Headers
+@using BlazorAppLab.Models
+@rendermode InteractiveServer
+@inject HttpClient Http
+
+<PageTitle>Asq Groq AI any question</PageTitle>
+
+<h3>Asq Groq AI any question</h3> 
+
+<div class="form-group">
+    <label for="firstName">Question:</label>
+    <input type="text" id="question" class="form-control" @bind="question" placeholder="Enter question hetre" />
+</div> 
+<div class="form-group">
+    <label for="groqanswer">Groq Answer:</label>
+    <input type="text" id="groqanswer" class="form-control" @bind="groqanswer" />
+    <button class="btn btn-primary" @onclick="AskGroqAI">Concatenate</button>
+</div>
+
+
+@code {
+    private string question;
+    private string groqanswer; 
+
+    private async Task AskGroqAI()
+    { 
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, "https://api.groq.com/openai/v1/chat/completions");
+        requestMessage.Content = new StringContent($@"{{
+            ""model"": ""openai/gpt-oss-20b"",
+            ""messages"": [{{
+                ""role"": ""user"",
+                ""content"": ""{question}""
+            }}]
+        }}", System.Text.Encoding.UTF8, "application/json");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "Groq AI API Key");
+
+        var response = await Http.SendAsync(requestMessage);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var groqResponse = await response.Content.ReadFromJsonAsync<GroqResponse>();
+            if (groqResponse != null)
+            {
+                groqanswer = groqResponse.Choices.FirstOrDefault()?.Message.Content;
+            }
+        }
+        else
+        {
+            // Handle error
+            groqanswer = $"Error: {response.StatusCode}";
+        } 
+    }
+}

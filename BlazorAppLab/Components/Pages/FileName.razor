@@ -1,0 +1,37 @@
+﻿@page "/fullname" 
+@rendermode InteractiveServer
+
+<PageTitle>Full Name Concatenation</PageTitle>
+
+<h3>Full Name Concatenation</h3>
+
+<p>Enter your first and last name below to see the full name.</p>
+
+<div class="form-group">
+    <label for="firstName">First Name:</label>
+    <input type="text" id="firstName" class="form-control" @bind="firstName" placeholder="Enter first name" />
+</div>
+<br />
+<div class="form-group">
+    <label for="lastName">Last Name:</label>
+    <input type="text" id="lastName" class="form-control" @bind="lastName" placeholder="Enter last name" />
+</div>
+<br />
+<div class="form-group">
+    <label for="fullName">Full Name:</label>
+    <input type="text" id="fullName" class="form-control" @bind="fullName" />
+    <button class="btn btn-primary" @onclick="Concatenate">Concatenate</button>
+</div>
+
+
+@code {
+    private string firstName;
+    private string lastName;
+    private string fullName; 
+     
+
+    private void Concatenate()
+    {
+        fullName = $"{firstName} {lastName}".Trim();
+    }
+}
