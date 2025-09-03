@@ -43,7 +43,7 @@
             var groqResponse = await response.Content.ReadFromJsonAsync<GroqResponse>();
             if (groqResponse != null)
             {
-                groqanswer = groqResponse.Choices.FirstOrDefault()?.Message.Content;
+                groqanswer = groqResponse.Choices.FirstOrDefault()?.Message.Content.Replace("**","");
             }
         }
         else

@@ -1,0 +1,74 @@
+﻿@page "/askgemini"
+@using System.Net.Http.Headers
+@using BlazorAppLab.Models
+@using System.Text.Json
+@using System.Text
+@rendermode InteractiveServer
+@inject HttpClient Http
+
+<PageTitle>Asq Gemini AI any question</PageTitle>
+
+<h3>Asq Gemini AI any question</h3>
+
+<div class="form-group">
+    <label for="firstName">Question:</label>
+    <input type="text" id="question" class="form-control" @bind="question" placeholder="Enter question hetre" />
+</div>
+<div class="form-group">
+    <label for="groqanswer">Groq Answer:</label>
+    <input type="text" id="groqanswer" class="form-control" @bind="geminianswer" />
+    <button class="btn btn-primary" @onclick="AskGeminiAI">Concatenate</button>
+</div>
+
+
+@code {
+    private string question;
+    private string geminianswer;
+
+    private async Task AskGeminiAI()
+    {      
+        // Load your API key
+        var apiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY");
+        var model = "gemini-2.0-flash";
+
+        // Create the JSON payload
+        var requestBody = new
+        {
+            contents = new[]
+            {
+        new
+        {
+            parts = new[]
+            {
+                new { text = question }
+            }
+        }
+        }
+        };
+
+        var jsonPayload = JsonSerializer.Serialize(requestBody);
+
+        // Create HttpClient
+        using var httpClient = new HttpClient();
+        var requestUri = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}";
+
+        // Send the request
+        var httpContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+        var response = await httpClient.PostAsync(requestUri, httpContent);
+
+        // Process the response
+        response.EnsureSuccessStatusCode();
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        // Parse the JSON response
+        var jsonDoc = JsonDocument.Parse(responseContent);
+        var generatedText = jsonDoc.RootElement
+            .GetProperty("candidates")[0]
+            .GetProperty("content")
+            .GetProperty("parts")[0]
+            .GetProperty("text")
+            .GetString();
+
+        geminianswer = generatedText;
+    }
+}
